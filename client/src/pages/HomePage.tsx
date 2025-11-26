@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card, Avatar, Tag } from 'antd';
+import { Button, Card, Tag } from 'antd';
 import { Link } from 'react-router-dom';
 import {
   CalendarOutlined,
