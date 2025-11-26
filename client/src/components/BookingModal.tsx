@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Form, DatePicker, TimePicker, Select, message } from 'antd';
 import axios from 'axios';
 import type { Service } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface BookingModalProps {
   visible: boolean;
@@ -13,8 +14,16 @@ interface BookingModalProps {
 const BookingModal: React.FC<BookingModalProps> = ({ visible, onCancel, onSuccess, services }) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const { user } = useAuth();
 
   const handleOk = async () => {
+    // Kiểm tra đăng nhập trước khi cho đặt
+    if (!user) {
+      message.warning('Vui lòng đăng nhập để đặt lịch!');
+      // Có thể navigate('/login') ở đây
+      return;
+    }
+
     try {
       // 1. Validate form
       const values = await form.validateFields();

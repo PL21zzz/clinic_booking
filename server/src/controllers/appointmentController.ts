@@ -50,7 +50,7 @@ export const bookAppointment = async (req: Request, res: Response) => {
     // 4. Nếu không trùng -> Thêm vào Database
     const insertQuery = `
       INSERT INTO appointments (patient_id, doctor_id, service_id, appointment_date, start_time, end_time, status)
-      VALUES ($1, $2, $3, $4, $5, $6, 'confirmed')
+      VALUES ($1, $2, $3, $4, $5, $6, 'pending')
       RETURNING *
     `;
 
@@ -72,7 +72,6 @@ export const bookAppointment = async (req: Request, res: Response) => {
 
 export const getAppointments = async (req: Request, res: Response) => {
   try {
-    // Câu lệnh JOIN thần thánh để lấy đầy đủ thông tin
     const query = `
       SELECT
         a.id,
@@ -80,22 +79,47 @@ export const getAppointments = async (req: Request, res: Response) => {
         a.start_time,
         a.end_time,
         a.status,
-        u.full_name as patient_name,  -- Lấy tên bệnh nhân từ bảng users
-        s.name as service_name        -- Lấy tên dịch vụ từ bảng services
+        u.full_name as patient_name,
+        u.id as patient_id, -- Lấy thêm ID để dùng cho nút Khám
+        s.name as service_name
       FROM appointments a
       JOIN users u ON a.patient_id = u.id
       JOIN services s ON a.service_id = s.id
       ORDER BY a.appointment_date DESC, a.start_time ASC
     `;
+    // Query này KHÔNG có WHERE doctor_id, để Admin thấy hết
 
     const result = await pool.query(query);
 
     res.status(200).json({
       success: true,
-      data: result.rows,
+      data: result.rows
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Lỗi lấy danh sách lịch hẹn' });
+    res.status(500).json({ success: false, message: 'Lỗi lấy danh sách' });
   }
 };
+
+// 3. Lấy lịch hẹn THEO BÁC SĨ (Dùng cho Doctor Dashboard)
+export const getDoctorAppointments = async (req: Request, res: Response) => {
+    const { doctor_id, date } = req.query;
+    try {
+        const query = `
+            SELECT a.id, a.start_time, a.status, a.appointment_date,
+                   u.full_name as patient_name, u.id as patient_id,
+                   s.name as service_name
+            FROM appointments a
+            JOIN users u ON a.patient_id = u.id
+            JOIN services s ON a.service_id = s.id
+            WHERE a.doctor_id = $1
+            AND a.appointment_date = $2
+            ORDER BY a.start_time ASC
+        `;
+        const result = await pool.query(query, [doctor_id, date]);
+        res.json({ success: true, data: result.rows });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Lỗi lấy danh sách bác sĩ' });
+    }
+};;

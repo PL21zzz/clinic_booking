@@ -3,6 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import serviceRoutes from './routes/serviceRoutes';
 import appointmentRoutes from './routes/appointmentRoutes';
+import medicalRecordRoutes from './routes/medicalRecordRoutes';
+import prescriptionRoutes from './routes/prescriptionRoutes';
+import invoiceRoutes from './routes/invoiceRoutes';
+import authRoutes from './routes/authRoutes';
 
 dotenv.config();
 
@@ -16,6 +20,10 @@ app.use(express.json()); // Cho phép đọc dữ liệu JSON gửi lên
 // Routes
 app.use('/api/services', serviceRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/prescriptions', prescriptionRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/auth', authRoutes);
 
 // Route mặc định
 app.get('/', (req, res) => {

@@ -59,7 +59,7 @@ const AdminDashboard: React.FC = () => {
         <Button
           type="primary"
           icon={<PlayCircleOutlined />}
-          disabled={record.status === 'completed'} // Nếu khám rồi thì ẩn nút đi
+          disabled={record.status !== 'pending'} // Nếu khám rồi thì ẩn nút đi
           onClick={() => {
             // Chuyển trang và mang theo cục data (record) của bệnh nhân này
             navigate('/admin/checkup', { state: { appointment: record } });
