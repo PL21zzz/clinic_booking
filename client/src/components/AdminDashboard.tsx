@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, Card, Tag, message, Button } from 'antd'; // <--- Thêm Button
 import { PlayCircleOutlined } from '@ant-design/icons';   // <--- Thêm Icon
 import { useNavigate } from 'react-router-dom';           // <--- Thêm cái này để chuyển trang
-import axios from 'axios';
+import axiosClient from '../api/axiosClient';
 import dayjs from 'dayjs';
 import type { Appointment } from '../types';
 
@@ -13,13 +13,15 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate(); // <--- Khởi tạo hook
 
   const fetchAppointments = async () => {
-    // ... (Code cũ giữ nguyên)
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:3000/api/appointments');
+      // 2. Sửa đường dẫn (bỏ localhost đi)
+      // axiosClient sẽ tự động thêm Header Authorization: Bearer ...
+      const res = await axiosClient.get('/appointments');
+
       setAppointments(res.data.data);
     } catch (error) {
-      message.error('Lỗi tải lịch hẹn!');
+      message.error('Không thể tải dữ liệu (Bạn có phải Admin không?)');
     } finally {
       setLoading(false);
     }
@@ -38,7 +40,7 @@ const AdminDashboard: React.FC = () => {
     {
       title: 'Giờ',
       render: (_: any, record: Appointment) => (
-        <Tag color="geekblue">{record.start_time.slice(0,5)} - {record.end_time.slice(0,5)}</Tag>
+        <Tag color="geekblue">{record.start_time.slice(0, 5)} - {record.end_time.slice(0, 5)}</Tag>
       )
     },
     {

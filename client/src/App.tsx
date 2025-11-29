@@ -10,23 +10,30 @@ import CashierPage from './pages/CashierPage';
 import { AuthProvider } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <BrowserRouter>
-    <AuthProvider>
+      <AuthProvider>
         <Routes>
           {/* MainLayout bao bọc tất cả các trang con */}
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="services" element={<ServicePage />} />
             <Route path="booking" element={<BookingPage />} />
-            <Route path="admin" element={<AdminPage />} />
-            <Route path="admin/checkup" element={<DoctorCheckupPage />} />
+            <Route path="admin" element={<ProtectedRoute allowedRoles={['doctor', 'admin']}>
+              <AdminPage />
+            </ProtectedRoute>} />
+            <Route path="admin/checkup" element={<ProtectedRoute allowedRoles={['doctor', 'admin']}>
+              <DoctorCheckupPage />
+            </ProtectedRoute>} />
             <Route path="my-records" element={<PatientHistoryPage />} />
-            <Route path="/cashier" element={<CashierPage />} />
+            <Route path="/cashier" element={<ProtectedRoute allowedRoles={['cashier', 'admin']}>
+              <CashierPage />
+            </ProtectedRoute>} />
             <Route path="/login" element={<LoginPage />} />
-           <Route path="/register" element={<RegisterPage />} />
+            <Route path="/register" element={<RegisterPage />} />
           </Route>
         </Routes>
       </AuthProvider>

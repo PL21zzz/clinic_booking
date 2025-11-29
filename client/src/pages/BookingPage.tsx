@@ -9,10 +9,10 @@ import {
   InfoCircleOutlined,
   CheckCircleOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
 import type { Service } from '../types';
 import BookingModal from '../components/BookingModal';
 import { useAuth } from '../contexts/AuthContext';
+import axiosClient from '../api/axiosClient';
 
 const BookingPage: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -25,8 +25,8 @@ const BookingPage: React.FC = () => {
     const fetchServices = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:3000/api/services');
-        setServices(response.data.data);
+        const res = await axiosClient.get('/services');
+        setServices(res.data.data);
       } catch (error) {
         console.error('Lỗi tải dịch vụ');
       } finally {
@@ -106,10 +106,10 @@ const BookingPage: React.FC = () => {
             {/* Card 3: Giấy tờ cần chuẩn bị (Thêm cho giống thật) */}
             <Card className="shadow-sm rounded-xl border border-gray-100" title={<span className="font-bold"><InfoCircleOutlined /> CẦN CHUẨN BỊ GÌ KHI ĐI KHÁM?</span>}>
               <ul className="space-y-3 text-gray-600">
-                <li className="flex items-start gap-2"><CheckCircleOutlined className="text-green-500 mt-1"/> Căn cước công dân / Hộ chiếu (Bản chính).</li>
-                <li className="flex items-start gap-2"><CheckCircleOutlined className="text-green-500 mt-1"/> Thẻ Bảo hiểm y tế / Bảo hiểm tư nhân (Nếu có).</li>
-                <li className="flex items-start gap-2"><CheckCircleOutlined className="text-green-500 mt-1"/> Các kết quả xét nghiệm, đơn thuốc cũ (Trong vòng 6 tháng).</li>
-                <li className="flex items-start gap-2"><CheckCircleOutlined className="text-green-500 mt-1"/> Nhịn ăn sáng nếu cần xét nghiệm máu.</li>
+                <li className="flex items-start gap-2"><CheckCircleOutlined className="text-green-500 mt-1" /> Căn cước công dân / Hộ chiếu (Bản chính).</li>
+                <li className="flex items-start gap-2"><CheckCircleOutlined className="text-green-500 mt-1" /> Thẻ Bảo hiểm y tế / Bảo hiểm tư nhân (Nếu có).</li>
+                <li className="flex items-start gap-2"><CheckCircleOutlined className="text-green-500 mt-1" /> Các kết quả xét nghiệm, đơn thuốc cũ (Trong vòng 6 tháng).</li>
+                <li className="flex items-start gap-2"><CheckCircleOutlined className="text-green-500 mt-1" /> Nhịn ăn sáng nếu cần xét nghiệm máu.</li>
               </ul>
             </Card>
 
@@ -137,7 +137,7 @@ const BookingPage: React.FC = () => {
             {/* Box Giờ làm việc */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <h3 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
-                <ClockCircleFilled className="text-blue-600"/> GIỜ LÀM VIỆC
+                <ClockCircleFilled className="text-blue-600" /> GIỜ LÀM VIỆC
               </h3>
               <div className="space-y-3 text-gray-600">
                 <div className="flex justify-between border-b border-dashed pb-2">
@@ -171,7 +171,6 @@ const BookingPage: React.FC = () => {
                 <a href="#" className="text-blue-600 text-sm font-semibold mt-2 block hover:underline">Chỉ đường trên Google Maps &rarr;</a>
               </div>
             </div>
-
           </div>
         </div>
 

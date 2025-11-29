@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Modal, Form, DatePicker, TimePicker, Select, message } from 'antd';
-import axios from 'axios';
 import type { Service } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import axiosClient from '../api/axiosClient';
 
 interface BookingModalProps {
   visible: boolean;
@@ -32,7 +32,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ visible, onCancel, onSucces
       // 2. Chuẩn bị dữ liệu gửi lên Server
       // Lưu ý: patient_id mình đang để cứng là 1 (giả bộ đã đăng nhập)
       const payload = {
-        patient_id: 1,
+        patient_id: user?.id,
         doctor_id: values.doctor_id,
         service_id: values.service_id,
         appointment_date: values.appointment_date.format('YYYY-MM-DD'), // Format ngày chuẩn SQL
@@ -40,7 +40,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ visible, onCancel, onSucces
       };
 
       // 3. Gọi API
-      await axios.post('http://localhost:3000/api/appointments/book', payload);
+      await axiosClient.post('/appointments/book', payload);
 
       message.success('Đặt lịch thành công!');
       form.resetFields();

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Timeline, Tag, Spin, Empty, Button, Modal, Table, Avatar} from 'antd';
+import { Timeline, Tag, Spin, Empty, Button, Modal, Table, Avatar } from 'antd';
 import {
   FileTextOutlined,
   UserOutlined,
@@ -7,10 +7,10 @@ import {
   MedicineBoxOutlined,
   ClockCircleOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
 import dayjs from 'dayjs';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axiosClient from '../api/axiosClient';
 
 const PatientHistoryPage: React.FC = () => {
   const [records, setRecords] = useState([]);
@@ -34,7 +34,7 @@ const PatientHistoryPage: React.FC = () => {
     const fetchHistory = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:3000/api/medical-records/history`, {
+        const res = await axiosClient.get(`/medical-records/history`, {
           // 3. THAY ID CỨNG BẰNG user.id
           params: { patient_id: user.id }
         });
@@ -55,7 +55,7 @@ const PatientHistoryPage: React.FC = () => {
     try {
       setLoadingPrescription(true);
       setIsModalOpen(true);
-      const res = await axios.get(`http://localhost:3000/api/prescriptions/${appointmentId}`);
+      const res = await axiosClient.get(`/prescriptions/${appointmentId}`);
       setCurrentPrescription(res.data.data);
     } catch (error) {
       console.error(error);
@@ -65,9 +65,9 @@ const PatientHistoryPage: React.FC = () => {
   };
 
   const columns = [
-    { title: 'Tên thuốc', dataIndex: 'medicine_name', key: 'name', render: (t:any) => <b className="text-blue-700">{t}</b> },
+    { title: 'Tên thuốc', dataIndex: 'medicine_name', key: 'name', render: (t: any) => <b className="text-blue-700">{t}</b> },
     { title: 'ĐVT', dataIndex: 'unit', key: 'unit', width: 80 },
-    { title: 'SL', dataIndex: 'quantity', key: 'qty', width: 80, render: (q:any) => <Tag color="blue">{q}</Tag> },
+    { title: 'SL', dataIndex: 'quantity', key: 'qty', width: 80, render: (q: any) => <Tag color="blue">{q}</Tag> },
     { title: 'Liều dùng', dataIndex: 'dosage', key: 'dosage' },
   ];
 
@@ -95,8 +95,8 @@ const PatientHistoryPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4">
         {records.length === 0 ? (
           <div className="bg-white p-10 rounded-xl shadow-sm text-center">
-             <Empty description="Bạn chưa có lịch sử khám bệnh nào." />
-             <Button type="primary" className="mt-4 bg-blue-600">Đặt lịch ngay</Button>
+            <Empty description="Bạn chưa có lịch sử khám bệnh nào." />
+            <Button type="primary" className="mt-4 bg-blue-600">Đặt lịch ngay</Button>
           </div>
         ) : (
           <Timeline className="p-4">
@@ -147,9 +147,9 @@ const PatientHistoryPage: React.FC = () => {
                       <p className="text-xs font-bold text-green-600 uppercase tracking-wider mb-2">Hướng điều trị</p>
                       <p className="text-gray-800 whitespace-pre-line">{rec.treatment_plan}</p>
                       {rec.notes && (
-                         <p className="text-gray-500 text-sm mt-2 italic border-t border-green-200 pt-2">
-                           Note: {rec.notes}
-                         </p>
+                        <p className="text-gray-500 text-sm mt-2 italic border-t border-green-200 pt-2">
+                          Note: {rec.notes}
+                        </p>
                       )}
                     </div>
                   </div>

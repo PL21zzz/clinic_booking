@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Card, message, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import axiosClient from '../api/axiosClient';
 
 const { Title } = Typography;
 
@@ -15,7 +15,7 @@ const LoginPage: React.FC = () => {
     try {
       setLoading(true);
       // Gọi API Backend
-      const res = await axios.post('http://localhost:3000/api/auth/login', {
+      const res = await axiosClient.post('/auth/login', {
         email: values.email,
         password: values.password
       });

@@ -1,13 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// Định nghĩa kiểu dữ liệu User
-interface User {
-  id: number;
-  full_name: string;
-  email: string;
-  role: 'patient' | 'doctor' | 'admin' | 'cashier';
-}
+import type { User } from '../types'; // Import type User từ file types.ts xịn xò lúc nãy
 
 interface AuthContextType {
   user: User | null;
@@ -15,6 +8,7 @@ interface AuthContextType {
   login: (userData: User, token: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  loading: boolean; // <--- 1. THÊM DÒNG NÀY VÀO INTERFACE
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -22,15 +16,25 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+
+  // <--- 2. THÊM STATE LOADING (Mặc định là TRUE để chờ kiểm tra)
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
-  // Khi F5 trang, thử khôi phục user từ localStorage (nếu bạn lưu user ở đó)
-  // Trong thực tế, ta thường gọi API /me để lấy lại thông tin user từ token
   useEffect(() => {
+    // Giả lập kiểm tra đăng nhập từ LocalStorage
     const storedUser = localStorage.getItem('user');
-    if (token && storedUser) {
+    const storedToken = localStorage.getItem('token');
+
+    if (storedToken && storedUser) {
       setUser(JSON.parse(storedUser));
+      setToken(storedToken);
     }
+
+    // <--- 3. SAU KHI KIỂM TRA XONG THÌ TẮT LOADING
+    setLoading(false);
+
   }, []);
 
   const login = (userData: User, newToken: string) => {
@@ -39,8 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
 
-    // Điều hướng dựa trên quyền
-    if (userData.role === 'doctor') navigate('/admin');
+    // Điều hướng phân quyền
+    if (userData.role === 'doctor' || userData.role === 'admin') navigate('/admin');
     else if (userData.role === 'cashier') navigate('/cashier');
     else navigate('/');
   };
@@ -54,13 +58,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{
+      user,
+      token,
+      login,
+      logout,
+      isAuthenticated: !!user,
+      loading // <--- 4. NHỚ TRUYỀN BIẾN LOADING VÀO ĐÂY
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook để dùng nhanh ở các trang khác
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within an AuthProvider");

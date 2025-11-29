@@ -101,25 +101,38 @@ export const getAppointments = async (req: Request, res: Response) => {
   }
 };
 
-// 3. Lấy lịch hẹn THEO BÁC SĨ (Dùng cho Doctor Dashboard)
-export const getDoctorAppointments = async (req: Request, res: Response) => {
-    const { doctor_id, date } = req.query;
-    try {
-        const query = `
-            SELECT a.id, a.start_time, a.status, a.appointment_date,
-                   u.full_name as patient_name, u.id as patient_id,
-                   s.name as service_name
-            FROM appointments a
-            JOIN users u ON a.patient_id = u.id
-            JOIN services s ON a.service_id = s.id
-            WHERE a.doctor_id = $1
-            AND a.appointment_date = $2
-            ORDER BY a.start_time ASC
-        `;
-        const result = await pool.query(query, [doctor_id, date]);
-        res.json({ success: true, data: result.rows });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Lỗi lấy danh sách bác sĩ' });
+// API CHO BỆNH NHÂN/BÁC SĨ (Xem của chính mình)
+export const getMyAppointments = async (req: any, res: Response) => {
+  // Lấy ID và Role từ Token (do middleware verifyToken gán vào req.user)
+  const userId = req.user.id;
+  const userRole = req.user.role;
+
+  try {
+    let query = `
+      SELECT a.*, u.full_name as patient_name, s.name as service_name, d.full_name as doctor_name
+      FROM appointments a
+      JOIN users u ON a.patient_id = u.id
+      JOIN services s ON a.service_id = s.id
+      JOIN users d ON a.doctor_id = d.id
+    `;
+
+    const params = [userId];
+
+    // Nếu là Bệnh nhân -> Chỉ lấy lịch có patient_id = userId
+    if (userRole === 'patient') {
+      query += ` WHERE a.patient_id = $1`;
     }
-};;
+    // Nếu là Bác sĩ -> Chỉ lấy lịch có doctor_id = userId
+    else if (userRole === 'doctor') {
+      query += ` WHERE a.doctor_id = $1`;
+    }
+
+    query += ` ORDER BY a.appointment_date DESC`;
+
+    const result = await pool.query(query, params);
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Table, Button, Modal, Descriptions, Radio, message, Divider } from 'antd';
 import { DollarCircleOutlined, CalculatorOutlined } from '@ant-design/icons';
-import axios from 'axios';
 import dayjs from 'dayjs';
+import axiosClient from '../api/axiosClient';
 
 const CashierPage: React.FC = () => {
   const [unpaidList, setUnpaidList] = useState([]); // Danh sách chờ thanh toán
@@ -20,7 +20,7 @@ const CashierPage: React.FC = () => {
   const fetchUnpaid = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:3000/api/appointments'); // API Admin cũ
+      const res = await axiosClient.get('/appointments');
       // Chỉ lấy status 'completed' (đã khám xong mới thu tiền)
       const completed = res.data.data.filter((app: any) => app.status === 'completed');
       setUnpaidList(completed);
@@ -39,7 +39,7 @@ const CashierPage: React.FC = () => {
   const handleOpenPayment = async (record: any) => {
     setSelectedAppointment(record);
     try {
-      const res = await axios.get(`http://localhost:3000/api/invoices/preview/${record.id}`);
+      const res = await axiosClient.get(`/invoices/preview/${record.id}`);
       setInvoiceDetail(res.data.data);
       setIsModalOpen(true);
     } catch (error) {
@@ -50,7 +50,7 @@ const CashierPage: React.FC = () => {
   // 3. Xử lý thanh toán
   const handleConfirmPayment = async () => {
     try {
-      await axios.post('http://localhost:3000/api/invoices/pay', {
+      await axiosClient.post('/invoices/pay', {
         appointment_id: selectedAppointment.id,
         total_amount: invoiceDetail.total_amount,
         payment_method: paymentMethod
@@ -65,9 +65,9 @@ const CashierPage: React.FC = () => {
 
   const columns = [
     { title: 'Mã HS', dataIndex: 'id', width: 80 },
-    { title: 'Bệnh nhân', dataIndex: 'patient_name', render: (t:string) => <b>{t}</b> },
+    { title: 'Bệnh nhân', dataIndex: 'patient_name', render: (t: string) => <b>{t}</b> },
     { title: 'Dịch vụ', dataIndex: 'service_name' },
-    { title: 'Ngày khám', dataIndex: 'appointment_date', render: (d:string) => dayjs(d).format('DD/MM/YYYY') },
+    { title: 'Ngày khám', dataIndex: 'appointment_date', render: (d: string) => dayjs(d).format('DD/MM/YYYY') },
     {
       title: 'Hành động',
       key: 'action',
@@ -115,12 +115,12 @@ const CashierPage: React.FC = () => {
             <Divider orientation="horizontal" className="text-sm">Chi tiết tiền thuốc</Divider>
             <ul className="list-disc pl-5 text-gray-600">
               {invoiceDetail.medicines.length === 0 ? <li>Không kê thuốc</li> :
-               invoiceDetail.medicines.map((med: any, idx: number) => (
-                <li key={idx} className="flex justify-between">
-                  <span>{med.name} (x{med.quantity})</span>
-                  <span>{parseFloat(med.total).toLocaleString()} đ</span>
-                </li>
-              ))}
+                invoiceDetail.medicines.map((med: any, idx: number) => (
+                  <li key={idx} className="flex justify-between">
+                    <span>{med.name} (x{med.quantity})</span>
+                    <span>{parseFloat(med.total).toLocaleString()} đ</span>
+                  </li>
+                ))}
             </ul>
 
             <div className="bg-green-50 p-4 rounded-lg flex justify-between items-center mt-4 border border-green-200">

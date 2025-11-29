@@ -7,9 +7,9 @@ import {
   CalendarOutlined,
   MedicineBoxOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import type { Service } from '../types';
+import axiosClient from '../api/axiosClient';
 
 const ServicePage: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -22,7 +22,7 @@ const ServicePage: React.FC = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/api/services');
+      const response = await axiosClient.get('/services');
       setServices(response.data.data);
       setFilteredServices(response.data.data);
     } catch (error) {
@@ -155,7 +155,7 @@ const ServicePage: React.FC = () => {
               />
             ) : (
               <div className="p-10 text-center">
-                 <Empty description="Không tìm thấy dịch vụ nào phù hợp" />
+                <Empty description="Không tìm thấy dịch vụ nào phù hợp" />
               </div>
             )}
           </div>
@@ -164,22 +164,22 @@ const ServicePage: React.FC = () => {
         {/* --- INFO BOX (Thông tin thêm) --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
           <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 flex items-start gap-4">
-            <div className="bg-white p-3 rounded-full text-blue-600 shadow-sm"><DollarCircleOutlined style={{fontSize: 20}} /></div>
+            <div className="bg-white p-3 rounded-full text-blue-600 shadow-sm"><DollarCircleOutlined style={{ fontSize: 20 }} /></div>
             <div>
               <h4 className="font-bold text-blue-800">Chi phí minh bạch</h4>
               <p className="text-sm text-blue-600/80 m-0">Cam kết đúng giá niêm yết, tư vấn kỹ trước khi thực hiện.</p>
             </div>
           </div>
           <div className="bg-green-50 p-6 rounded-xl border border-green-100 flex items-start gap-4">
-             <div className="bg-white p-3 rounded-full text-green-600 shadow-sm"><MedicineBoxOutlined style={{fontSize: 20}} /></div>
-             <div>
+            <div className="bg-white p-3 rounded-full text-green-600 shadow-sm"><MedicineBoxOutlined style={{ fontSize: 20 }} /></div>
+            <div>
               <h4 className="font-bold text-green-800">Bảo hiểm y tế</h4>
               <p className="text-sm text-green-600/80 m-0">Hỗ trợ thanh toán BHYT và Bảo hiểm tư nhân.</p>
             </div>
           </div>
           <div className="bg-purple-50 p-6 rounded-xl border border-purple-100 flex items-start gap-4">
-             <div className="bg-white p-3 rounded-full text-purple-600 shadow-sm"><ClockCircleOutlined style={{fontSize: 20}} /></div>
-             <div>
+            <div className="bg-white p-3 rounded-full text-purple-600 shadow-sm"><ClockCircleOutlined style={{ fontSize: 20 }} /></div>
+            <div>
               <h4 className="font-bold text-purple-800">Đặt lịch 24/7</h4>
               <p className="text-sm text-purple-600/80 m-0">Chủ động thời gian, không cần chờ đợi lâu.</p>
             </div>

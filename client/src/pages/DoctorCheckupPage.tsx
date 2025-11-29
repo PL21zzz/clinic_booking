@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Input, Button, Descriptions, message, Select, Space, InputNumber, Divider } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import dayjs from 'dayjs';
+import axiosClient from '../api/axiosClient';
 
 const { Option } = Select;
 
@@ -19,7 +19,7 @@ const DoctorCheckupPage: React.FC = () => {
   useEffect(() => {
     const fetchMeds = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/api/prescriptions/medicines');
+        const res = await axiosClient.get('/prescriptions/medicines');
         setMedicines(res.data.data);
       } catch (e) {
         console.error("Lỗi tải thuốc");
@@ -34,7 +34,7 @@ const DoctorCheckupPage: React.FC = () => {
     setLoading(true);
     try {
       // 1. Lưu bệnh án (API cũ)
-      await axios.post('http://localhost:3000/api/medical-records', {
+      await axiosClient.post('/medical-records', {
         appointment_id: appointment.id,
         patient_id: appointment.patient_id, // Lấy từ appointment
         doctor_id: 2, // Hardcode tạm
@@ -46,7 +46,7 @@ const DoctorCheckupPage: React.FC = () => {
 
       // 2. Lưu đơn thuốc (API mới) - Chỉ gọi nếu bác sĩ có kê thuốc
       if (values.prescriptions && values.prescriptions.length > 0) {
-        await axios.post('http://localhost:3000/api/prescriptions', {
+        await axiosClient.post('/prescriptions', {
           appointment_id: appointment.id,
           medicines: values.prescriptions // Mảng thuốc gửi lên
         });
@@ -74,16 +74,16 @@ const DoctorCheckupPage: React.FC = () => {
         <Form layout="vertical" onFinish={onFinish} autoComplete="off">
           {/* --- PHẦN 1: CHẨN ĐOÁN --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <Form.Item label="Triệu chứng" name="symptoms" rules={[{ required: true }]}>
-               <Input.TextArea rows={2} />
-             </Form.Item>
-             <Form.Item label="Chẩn đoán" name="diagnosis" rules={[{ required: true }]}>
-               <Input />
-             </Form.Item>
+            <Form.Item label="Triệu chứng" name="symptoms" rules={[{ required: true }]}>
+              <Input.TextArea rows={2} />
+            </Form.Item>
+            <Form.Item label="Chẩn đoán" name="diagnosis" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
           </div>
 
           <Form.Item label="Hướng điều trị" name="treatment_plan" rules={[{ required: true }]}>
-             <Input.TextArea rows={2} />
+            <Input.TextArea rows={2} />
           </Form.Item>
 
           <Divider orientation='horizontal'>Kê Đơn Thuốc</Divider>

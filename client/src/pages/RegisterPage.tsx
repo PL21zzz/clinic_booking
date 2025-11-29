@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Card, message, Typography } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosClient from '../api/axiosClient';
 
 const { Title } = Typography;
 
@@ -14,7 +14,7 @@ const RegisterPage: React.FC = () => {
     try {
       setLoading(true);
       // Gọi API đăng ký
-      await axios.post('http://localhost:3000/api/auth/register', {
+      await axiosClient.post('/auth/register', {
         full_name: values.full_name,
         email: values.email,
         password: values.password,
