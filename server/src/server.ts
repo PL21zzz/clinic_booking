@@ -7,6 +7,7 @@ import medicalRecordRoutes from './routes/medicalRecordRoutes';
 import prescriptionRoutes from './routes/prescriptionRoutes';
 import invoiceRoutes from './routes/invoiceRoutes';
 import authRoutes from './routes/authRoutes';
+import reportRoutes from './routes/reportRoutes';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Route mặc định
 app.get('/', (req, res) => {
