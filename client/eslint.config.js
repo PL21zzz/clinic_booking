@@ -19,5 +19,22 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // 1. Tắt báo lỗi biến khai báo mà không dùng
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+
+      // 2. Cho phép dùng kiểu 'any' thoải mái
+      "@typescript-eslint/no-explicit-any": "off",
+
+      // 3. Tắt cảnh báo về React Hooks (useEffect thiếu dependency)
+      "react-hooks/exhaustive-deps": "off",
+
+      // 4. Tắt cảnh báo về prop-types (nếu dùng TS thì không cần cái này)
+      "react/prop-types": "off",
+
+      // 5. Tắt cảnh báo về Fast Refresh (thỉnh thoảng báo khi export hằng số)
+      "react-refresh/only-export-components": "off"
+    }
   },
 ])

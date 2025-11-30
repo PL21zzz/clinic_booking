@@ -1,37 +1,32 @@
 // server/src/controllers/authController.ts
 import { Request, Response } from 'express';
-import pool from '../config/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import User from '../models/User'; // <--- Import Model vừa tạo
 
-// Key bí mật để ký tên vào Token (Thực tế nên để trong file .env)
 const JWT_SECRET = process.env.JWT_SECRET || 'phong-clinic-secret-key-2025';
 
-// 1. ĐĂNG KÝ (Register)
+// 1. ĐĂNG KÝ
 export const register = async (req: Request, res: Response) => {
   const { full_name, email, password, role } = req.body;
 
   try {
-    // Kiểm tra xem email đã tồn tại chưa
-    const userExist = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (userExist.rows.length > 0) {
+    // Bước A: Gọi Model để kiểm tra email
+    const userExist = await User.findByEmail(email);
+    if (userExist) {
       return res.status(400).json({ success: false, message: 'Email này đã được sử dụng!' });
     }
 
-    // Mã hóa mật khẩu (Hashing)
+    // Bước B: Mã hóa mật khẩu (Logic này thuộc về Controller)
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Lưu vào DB
-    // Lưu ý: role mặc định là 'patient' nếu không truyền lên
-    const insertQuery = `
-      INSERT INTO users (full_name, email, password, role)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, full_name, email, role
-    `;
-    const newUser = await pool.query(insertQuery, [full_name, email, hashedPassword, role || 'patient']);
+    // Bước C: Gọi Model để lưu vào DB
+    // (Xử lý role mặc định là 'patient' ở đây trước khi gửi cho Model)
+    const userRole = role || 'patient';
+    const newUser = await User.create(full_name, email, hashedPassword, userRole);
 
-    res.status(201).json({ success: true, message: 'Đăng ký thành công!', user: newUser.rows[0] });
+    res.status(201).json({ success: true, message: 'Đăng ký thành công!', user: newUser });
 
   } catch (error) {
     console.error(error);
@@ -39,27 +34,25 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-// 2. ĐĂNG NHẬP (Login)
+// 2. ĐĂNG NHẬP
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
-    // Tìm user theo email
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) {
+    // Bước A: Gọi Model tìm user
+    const user = await User.findByEmail(email);
+
+    if (!user) {
       return res.status(400).json({ success: false, message: 'Email hoặc mật khẩu không đúng!' });
     }
 
-    const user = result.rows[0];
-
-    // So sánh mật khẩu (Pass nhập vào vs Pass đã mã hóa trong DB)
+    // Bước B: So sánh mật khẩu
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Email hoặc mật khẩu không đúng!' });
     }
 
-    // Tạo Token (Cấp vé)
-    // Trong vé này chứa ID và Role của user
+    // Bước C: Tạo Token
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
 
     res.json({
