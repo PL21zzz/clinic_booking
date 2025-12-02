@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Statistic, Row, Col, Spin, Table, Tag, Empty } from 'antd';
+import { Card, Statistic, Row, Col, Spin, Table, Tag, Empty, Button } from 'antd';
 import {
   UserOutlined,
   DollarCircleOutlined,
-  CalendarOutlined
+  CalendarOutlined,
+  PlayCircleOutlined
 } from '@ant-design/icons';
 import {
   BarChart, Bar,
@@ -13,6 +14,7 @@ import {
 import axiosClient from '../api/axiosClient';
 import type { Appointment } from '../types';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -20,6 +22,8 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -31,7 +35,7 @@ const AdminDashboard: React.FC = () => {
       const resStats = await axiosClient.get('/reports/dashboard');
       setStats(resStats.data.data);
 
-      const resAppt = await axiosClient.get('/appointments/all');
+      const resAppt = await axiosClient.get('/appointments');
       setRecentAppointments(resAppt.data.data.slice(0, 5));
     } catch (error) {
       console.error("Lỗi tải dashboard", error);
@@ -204,9 +208,28 @@ const AdminDashboard: React.FC = () => {
                 if (status === 'paid') color = 'success';
                 if (status === 'pending') color = 'warning';
                 if (status === 'completed') color = 'processing';
-                if (status === 'confirmed') color = 'blue';
                 return <Tag color={color}>{status?.toUpperCase()}</Tag>
               }
+            },
+            {
+              title: 'Hành động',
+              key: 'action',
+              render: (_, record) => (
+                <Button
+                  style={{ width: 100 }}
+                  type="primary"
+                  icon={<PlayCircleOutlined />}
+                  // Chỉ hiện nút Khám khi trạng thái là 'pending' hoặc 'confirmed'
+                  // Ẩn khi đã khám xong (completed) hoặc đã thanh toán (paid)
+                  disabled={['completed', 'paid', 'cancelled'].includes(record.status)}
+                  onClick={() => {
+                    // CHUYỂN SANG TRANG KHÁM BỆNH
+                    navigate('/admin/checkup', { state: { appointment: record } });
+                  }}
+                >
+                  {record.status === 'completed' || record.status === 'paid' ? 'Đã khám' : 'Khám'}
+                </Button>
+              )
             }
           ]}
         />
